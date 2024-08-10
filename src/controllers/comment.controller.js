@@ -81,7 +81,6 @@ const addComment = asyncHandler(async function(req,res){
     video: videoId,
     owner: userId
   });
-   console.log(newComment);
   // Save the comment to the database
   await newComment.save();
 

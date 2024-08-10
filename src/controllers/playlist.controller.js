@@ -35,9 +35,26 @@ const createPlaylist = asyncHandler(async (req, res) => {
 })
 
 const getUserPlaylists = asyncHandler(async (req, res) => {
-    const {userId} = req.params
-    //TODO: get user playlists
-})
+    const { userId } = req.params;
+
+    try {
+        // Find all playlists by the user ID
+        const playlists = await playlist.find({ owner: userId }).populate('videos owner');
+
+        // Check if the user has any playlists
+        if (playlists.length === 0) {
+            return res.status(404).json({ success: false, message: "No playlists found for this user" });
+        }
+
+        // Return the user's playlists
+        res.status(200).json({ success: true, data: playlists });
+    } catch (error) {
+        console.error("Error fetching user playlists:", error);
+        // Handle other errors
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 
 const getPlaylistById = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
@@ -83,7 +100,6 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 
         // Find the video by its ID
         const video = await Video.findById(videoId);
-        // console.log(video);
         // Check if the video exists
         if (!video) {
             return res.status(404).json({ success: false, message: "Video not found" });
@@ -91,7 +107,6 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 
         // Add the video to the playlist
         Playlist.videos.push(video);
-        console.log(Playlist.videos);
         await Playlist.save();
 
         // Return success message

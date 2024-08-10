@@ -6,72 +6,64 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Video } from "../models/video.model.js";
 import { Tweet } from "../models/tweet.model.js";
 
-const getLikedVideos = asyncHandler(async function(req,res){
-    const { videoId } = req.params;
+const getLikedVideos = asyncHandler(async function(req, res) {
     const userId = req.user ? req.user._id : null; // Ensure req.user is defined
-    console.log("videoId:", videoId);
-    console.log("userId:", userId);
-    const video = await Video.findById(videoId);
-   
-    // Check if the video ID is valid
-    if (!video) {
-        throw new ApiError(400, "Invalid video ID");
+    const { videoId } = req.params; // Extract videoId from req.params
+
+    // Ensure the user is authenticated
+    if (!userId) {
+        return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
     try {
-        // Check if a like document exists for the user and the video
-        const existingLike = await Like.findOne({ user: userId, video: videoId });
+        // Find likes for the specific video by the authenticated user
+        const likedVideos = await Like.find({ video: videoId, likedBy: userId }).populate('video');
 
-        if (existingLike) {
-            // If a like document exists, delete it (unlike the video)
-            await existingLike.remove();
-            return res.status(200).json({ success: true, message: "Video unliked" });
-        } else {
-            // If not, create a new like document (like the video)
-            const newLike = new Like({ user: userId, video: videoId });
-            await newLike.save();
-            return res.status(200).json({ success: true, message: "Video liked" });
+        // Check if the user has liked the specific video
+        if (!likedVideos || likedVideos.length === 0) {
+            return res.status(200).json({ success: true, message: "No liked videos found" });
         }
-    } catch (error) {
-        throw new ApiError(500, "Error toggling video like", error);
-    }})
 
-const toogleCommentLike = asyncHandler(async function(req,res){
+        // Return the list of liked videos
+        return res.status(200).json({ success: true, likedVideos });
+    } catch (error) {
+        console.error("Error fetching liked videos:", error);
+        // Handle errors properly
+        return res.status(500).json({ success: false, message: "Error fetching liked videos" });
+    }
+});
+
+
+
+const toogleCommentLike = asyncHandler(async function(req, res) {
     const { commentId } = req.params;
-    const { userId } = req.user; // Assuming you have user authentication middleware that populates req.user with user details
+    const userId = req.user ? req.user._id : null; // Assuming req.user contains the authenticated user's ID
 
     try {
         // Check if a like exists for the given comment by the current user
         const existingLike = await Like.findOne({ comment: commentId, likedBy: userId });
 
-        // If a like exists, remove it; if not, add a new like
+        // If a like exists, remove it
         if (existingLike) {
-            // Remove the existing like
-            // await Like.deleteOne({ comment: commentId, likedBy: userId });
-            // res.status(200).json({ success: true, message: "Comment like removed successfully" });
-            // Add a new like
-            const newLike = await Like.create(
-                {
-                likedBy: userId,
-                }
-                );
+            await Like.deleteOne({ comment: commentId, likedBy: userId });
+            return res.status(200).json({ success: true, message: "Comment like removed successfully" });
+        } 
 
-                try {
-                    await newLike.save();
-                } catch (error) {
-                    console.log(error)
-                    return res.status(500).json({ success: false, message: 'something error', error });
-                }
+        // If no like exists, add a new like
+        const newLike = await Like.create({
+            comment: commentId,
+            likedBy: userId
+        });
 
+        await newLike.save();
 
-            res.status(200).json({ success: true, message: "Comment liked successfully", newLike });
-        }
+        return res.status(200).json({ success: true, message: "Comment liked successfully", newLike });
+
     } catch (error) {
         console.error("Error toggling comment like:", error);
-        // Handle other errors
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error", error });
     }
-})
+});
 
 const toogleTweetLike = asyncHandler(async function(req,res){
     const { tweetId } = req.params;
@@ -120,6 +112,7 @@ const toogleTweetLike = asyncHandler(async function(req,res){
 const toogleVideoLike = asyncHandler(async function(req,res){
     const { videoId } = req.params;
     const  userId  = req.user; // Assuming you have user authentication middleware that populates req.user with user details
+    
 
     try {
         // Validate videoId
@@ -143,7 +136,7 @@ const toogleVideoLike = asyncHandler(async function(req,res){
 
         if (existingLike) {
             // Remove the existing like
-            await existingLike.remove();
+            await Like.deleteOne({_id:existingLike._id});
             return res.status(200).json({ success: true, message: "Video unliked successfully" });
         } else {
             // Add a new like

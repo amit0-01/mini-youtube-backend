@@ -53,7 +53,6 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const channelId  = req.params.subscriberId;
-    console.log(channelId);
     try {
         // Validate channelId
         if (!mongoose.Types.ObjectId.isValid(channelId)) {
@@ -77,7 +76,6 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const  subscriberId  = req.params.channelId;
-    console.log(subscriberId);
 
     try {
         // Validate subscriberId

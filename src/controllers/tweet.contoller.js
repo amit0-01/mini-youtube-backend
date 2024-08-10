@@ -68,7 +68,6 @@ const updateTweet = asyncHandler(async (req, res) => {
     const { tweetId } = req.params;
     const { content } = req.body;
     const  userId  = req.user; // Assuming you have user authentication middleware that populates req.user with user details
-   console.log(userId)
     try {
         // Validate tweetId
         if (!mongoose.Types.ObjectId.isValid(tweetId)) {

@@ -13,6 +13,6 @@ router.use(verifyJWT);
 router.route("/toggle/v/:videoId").post(toogleVideoLike);
 router.route("/toggle/c/:commentId").post(toogleCommentLike);
 router.route("/toggle/t/:tweetId").post(toogleTweetLike);
-router.route("/videos").get(getLikedVideos);
+router.route("/videos/:videoId").get(getLikedVideos);
 
 export default router

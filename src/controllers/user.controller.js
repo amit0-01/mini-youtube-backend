@@ -16,14 +16,12 @@ const generateAccesTokenAdnRefreshTokens = async function(userId) {
     await user.save({ validateBeforeSave: false });
     return { accessToken, refreshToken };
   } catch (error) {
-    // console.log("error--------", error);
     throw new ApiError(500, "Something went wrong while generating refresh and access token");
   }
 }
 
 const registerdUser = asyncHandler(async function (req, res) {
   const { fullname, email, username, password } = req.body;
-  console.log("email", email);
 
   if ([fullname, email, username, password].some(field => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
@@ -86,7 +84,6 @@ const loginUser = asyncHandler(async function(req, res) {
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
-  // console.log(isPasswordValid);
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid user credentials");
   }
@@ -133,7 +130,6 @@ const logoutUser = asyncHandler(async function(req, res) {
 
 const refreshAccessToken = asyncHandler(async function(req,res){
   const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
-  console.log(incomingRefreshToken);
   if(!incomingRefreshToken){
     throw new ApiError(401, "unauthorized request");
   }
@@ -180,9 +176,7 @@ const changeCurrentPassword = asyncHandler(async function(req,res){
       const {oldPassword, newPassword} = req.body
 
       const user = await User.findById(req.user?._id)
-      console.log(user);
       const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-      // console.log(isPasswordCorrect);
       if(!isPasswordCorrect){
         throw new ApiError(400, "Invalid old password")
       }

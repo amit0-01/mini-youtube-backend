@@ -63,7 +63,6 @@ userSchema.methods.isPasswordCorrect = async function (passwordInput) {
         const passwordComparison = await bcrypt.compare(passwordInput, this.password);
         return passwordComparison;
     } catch (error) {
-      //  console.log("error ---------", error);
        return false; 
     }
 };
@@ -102,7 +101,6 @@ userSchema.methods.generateAccessToken = function() {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRTY 
       }
     );
-    //  console.log(refreshToken)
     return refreshToken;
   }
 export const User = mongoose.model('User', userSchema);
