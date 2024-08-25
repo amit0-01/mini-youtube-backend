@@ -20,7 +20,35 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
     const aggregate = Video.aggregate([
         { $match: filter },
-        { $sort: sort }
+        { $sort: sort },
+        // Join with User collection
+        {
+            $lookup: {
+                from: 'users', // Name of the User collection in MongoDB
+                localField: 'owner', // Field in Video documents
+                foreignField: '_id', // Field in User documents
+                as: 'ownerInfo' // Output field that holds the matched User documents
+            }
+        },
+        // Unwind the ownerInfo array
+        { $unwind: '$ownerInfo' },
+        // Project the desired fields
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                description: 1,
+                videoFile: 1,
+                thumbnail: 1,
+                duration: 1,
+                views: 1,
+                isPublished: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                'ownerInfo._id': 1, // userId
+                'ownerInfo.username': 1 // username
+            }
+        }
     ]);
 
     const options = {
@@ -28,9 +56,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         limit: parseInt(limit, 10),
     };
 
-
     const videos = await Video.aggregatePaginate(aggregate, options);
-
 
     res.status(200).json({
         success: true,
@@ -40,6 +66,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         data: videos.docs,
     });
 });
+
 
 const getVideoById = asyncHandler(async (req, res) => {
     const videoId = req.params.videoId;
@@ -116,11 +143,53 @@ const updateVideo = asyncHandler(async (req, res) => {
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
-    const video = await Video.findByIdAndDelete(req.params.id);
-    if (!video) {
-        return res.status(404).json({ success: false, message: 'Video not found' });
+    const { videoId, userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+        return res.status(400).json({ success: false, message: 'Invalid video ID' });
     }
-    res.status(200).json({ success: true, data: {} });
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+
+    try {
+        const deletedVideo = await Video.findByIdAndDelete(videoId);
+
+        if (!deletedVideo) {
+            return res.status(404).json({ success: false, message: 'Video not found' });
+        }
+
+        const userVideos = await Video.find({ owner: userId });
+
+        if (userVideos.length === 0) {
+            return res.status(404).json({ success: false, message: 'No videos found for this user' });
+        }
+
+        res.status(200).json({ success: true, data: userVideos });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
 });
 
-export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo };
+
+// get users videos
+
+const getUsersVideos = asyncHandler( async(req,res)=>{
+    const userId = req.params.userId;
+    if(!mongoose.Types.ObjectId.isValid(userId)){
+        return res.status(400)({success: false, message: 'Invalid user ID'})
+    }
+    try {
+        const userVideos = await Video.find({owner: userId})
+        if (!userVideos || userVideos.length ==0){
+            return res.status(404).json({success: false, message: 'No videos found for this user'});
+        }
+
+        res.status(200).json({success: true, data: userVideos});
+    } catch (error) {
+        res.status(500).json({success : false, message: 'server Error', error: error.message});
+    }
+});
+
+export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo, getUsersVideos };
