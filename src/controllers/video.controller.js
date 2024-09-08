@@ -175,20 +175,31 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 // get users videos
 
-const getUsersVideos = asyncHandler( async(req,res)=>{
+const getUsersVideos = asyncHandler(async (req, res) => {
     const userId = req.params.userId;
-    if(!mongoose.Types.ObjectId.isValid(userId)){
-        return res.status(400)({success: false, message: 'Invalid user ID'})
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ success: false, message: 'Invalid user ID' });
     }
+
     try {
-        const userVideos = await Video.find({owner: userId})
-        if (!userVideos || userVideos.length ==0){
-            return res.status(404).json({success: false, message: 'No videos found for this user'});
+        const userVideos = await Video.find({ owner: userId }).populate('owner');
+
+        if (!userVideos || userVideos.length === 0) {
+            return res.status(404).json({ success: false, message: 'No videos found for this user' });
         }
 
-        res.status(200).json({success: true, data: userVideos});
+        const formattedVideos = userVideos.map(video => {
+            const { owner, ...videoData } = video.toObject(); 
+            return {
+                ...videoData,
+                ownerInfo: owner 
+            };
+        });
+
+        res.status(200).json({ success: true, data: formattedVideos });
     } catch (error) {
-        res.status(500).json({success : false, message: 'server Error', error: error.message});
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 });
 
