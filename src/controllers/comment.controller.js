@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {Comment} from "../models/comment.model.js"
 import {Video} from "../models/video.model.js"
-const getVideoComments = asyncHandler(async function(req,res){
+const getVideoComments = asyncHandler(async function(req, res) {
     const { videoId } = req.params;
     const { page = 1, limit = 10 } = req.query;
 
@@ -43,16 +43,24 @@ const getVideoComments = asyncHandler(async function(req,res){
 
         const result = await Comment.aggregate(pipeline);
 
-        // Extract metadata and data from the result
+        // Check if the result has no comments
         const { metadata, data } = result[0];
+        const totalComments = metadata.length > 0 ? metadata[0].total : 0;
 
-        // Return paginated comments
-        res.status(200).json({ success: true, total: metadata[0].total, page: metadata[0].page, limit: metadata[0].limit, data });
+        // Return paginated comments (even if no comments)
+        res.status(200).json({ 
+            success: true, 
+            total: totalComments, 
+            page: metadata.length > 0 ? metadata[0].page : parseInt(page), 
+            limit: metadata.length > 0 ? metadata[0].limit : parseInt(limit), 
+            data 
+        });
     } catch (error) {
         console.error("Error fetching video comments:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
-})
+});
+
 
 const addComment = asyncHandler(async function(req,res){
     const { videoId } = req.params;

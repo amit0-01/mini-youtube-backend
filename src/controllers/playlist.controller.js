@@ -42,9 +42,9 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
         const playlists = await playlist.find({ owner: userId }).populate('videos owner');
 
         // Check if the user has any playlists
-        if (playlists.length === 0) {
-            return res.status(404).json({ success: false, message: "No playlists found for this user" });
-        }
+        // if (playlists.length === 0) {
+        //     return res.status(200).json({ success: true, message: "No playlists found for this user" });
+        // }
 
         // Return the user's playlists
         res.status(200).json({ success: true, data: playlists });

@@ -43,9 +43,11 @@ router
       .route("/:videoId/:userId")
       .delete(verifyJWT,deleteVideo)
 
-    router
+router
     .route("/users/:userId")
     .get(verifyJWT,getUsersVideos);
+
+
 
 
 // router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
