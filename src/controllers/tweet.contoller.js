@@ -53,7 +53,8 @@ const getUserTweets = asyncHandler(async (req, res) => {
         }
 
         // Retrieve tweets by user
-        const tweets = await Tweet.find({ owner: userId });
+        const tweets = await Tweet.find({ owner: userId })
+            .populate('owner'); 
 
         // Return tweets
         res.status(200).json({ success: true, data: tweets });
@@ -122,9 +123,41 @@ const deleteTweet = asyncHandler(async (req, res) => {
 
 })
 
+
+// GET ALL TWEETS
+const getAllTweets = asyncHandler(async (req,res) =>{
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const tweets = await Tweet.find()
+    .populate('owner')
+    .skip(skip)
+    .limit(limit)
+    .sort({createdAt : -1});
+
+    const totalTweets = await Tweet.countDocuments();
+
+    res.status(200).json(
+        new ApiResponse({
+            success: true,
+            data:{
+                tweets,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalTweets / limit),
+                    totalTweets,
+                },
+                message: "Tweets fetched Successfully",
+            }
+        })
+    )
+})
+
 export {
     createTweet,
     getUserTweets,
     updateTweet,
-    deleteTweet
+    deleteTweet,
+    getAllTweets
 }

@@ -91,7 +91,7 @@ const toogleTweetLike = asyncHandler(async function(req,res){
 
         if (existingLike) {
             // Remove the existing like
-            await Tweet.findByIdAndDelete(tweetId);
+            await Tweet.findByIdAndDelete(existingLike._id);
             return res.status(200).json({ success: true, message: "Tweet unliked successfully" });
         } else {
             // Add a new like

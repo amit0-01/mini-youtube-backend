@@ -21,18 +21,15 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const aggregate = Video.aggregate([
         { $match: filter },
         { $sort: sort },
-        // Join with User collection
         {
             $lookup: {
-                from: 'users', // Name of the User collection in MongoDB
-                localField: 'owner', // Field in Video documents
-                foreignField: '_id', // Field in User documents
-                as: 'ownerInfo' // Output field that holds the matched User documents
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'ownerInfo'
             }
         },
-        // Unwind the ownerInfo array
         { $unwind: '$ownerInfo' },
-        // Project the desired fields
         {
             $project: {
                 _id: 1,
@@ -45,8 +42,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
                 isPublished: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                'ownerInfo._id': 1, // userId
-                'ownerInfo.username': 1 // username
+                'ownerInfo._id': 1,
+                'ownerInfo.username': 1 
             }
         }
     ]);
