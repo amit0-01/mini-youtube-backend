@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
 import mongoose from 'mongoose'
+import fs from 'fs';
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
@@ -124,6 +125,20 @@ const publishAVideo = asyncHandler(async (req, res) => {
         await video.save();
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Failed to save video in database', error });
+    }
+
+    fs.unlink(videoFile.path, (err)=>{
+        if(err){
+            console.log('Error deleting video File', err);            
+        }
+    });
+
+    if(thumbnailFile){
+        fs.unlink(thumbnailFile.path,(err)=>{
+            if(err){
+                console.error('Error deleting thumbnail file: ', err);
+            }
+        })
     }
 
     res.status(201).json({ success: true, data: video });
