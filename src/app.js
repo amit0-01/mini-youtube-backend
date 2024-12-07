@@ -25,6 +25,7 @@ import commentRouter from "./routes/comment.routes.js"
 import likeRouter from "./routes/like.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
 import viewRouter from "./routes/view.routes.js"
+import chatBotRoute from './routes/chatbot.route.js';
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/tweets", tweetRouter)
@@ -34,6 +35,7 @@ app.use("/api/v1/comments", commentRouter)
 app.use("/api/v1/likes", likeRouter)
 app.use("/api/v1/playlist", playlistRouter)
 app.use("/api/v1/view", viewRouter)
+app.use("/api/v1/chatBot", chatBotRoute);
 
 export {app}
 

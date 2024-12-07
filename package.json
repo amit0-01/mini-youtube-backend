@@ -13,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@google/generative-ai": "^0.21.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.2.0",
     "cookie-parser": "^1.4.6",
