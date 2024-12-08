@@ -239,14 +239,15 @@ const updateUserAvatar = asyncHandler(async function(req,res){
 });
 
 const updateCoverImage = asyncHandler(async function(req,res){
+  console.log('req',req.file);
+  
   const coverImageLocalPath = req.file?.path
 
   if(!coverImageLocalPath){
     throw new ApiError(400, "Cover Imgae file is missing");
   }
 
-  const coverImage = await uploadOnCloudinary
-  (coverImageLocalPath)
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
   if(!coverImage.url){
     throw new ApiError(400, "Error while uploading CoverImage");
@@ -256,7 +257,7 @@ const updateCoverImage = asyncHandler(async function(req,res){
     req.user?._id,
     {
       $set:{
-        avatar: coverImage.url
+        coverImage: coverImage.url
       }
     },
     {new:true}
