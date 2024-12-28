@@ -6,7 +6,7 @@ import mongoose from 'mongoose'
 import fs from 'fs';
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
+    const { page = 1, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
 
     const filter = {};
     if (query) {
@@ -49,19 +49,24 @@ const getAllVideos = asyncHandler(async (req, res) => {
         }
     ]);
 
-    const options = {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-    };
+    // const options = {
+    //     page: parseInt(page, 10),
+    //     limit: parseInt(limit, 10),
+    // };
 
-    const videos = await Video.aggregatePaginate(aggregate, options);
+    // const videos = await Video.aggregatePaginate(aggregate, options);
+    const videos = await aggregate.exec(); 
+    // const videos = await Video.find(filter).sort(sort).exec();
 
     res.status(200).json({
+        // success: true,
+        // count: videos.docs.length,
+        // page: videos.page,
+        // totalPages: videos.totalPages,
+        // data: videos.docs,
         success: true,
-        count: videos.docs.length,
-        page: videos.page,
-        totalPages: videos.totalPages,
-        data: videos.docs,
+        count: videos.length,
+        data: videos,
     });
 });
 
