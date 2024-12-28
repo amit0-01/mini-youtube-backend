@@ -15,7 +15,6 @@ cloudinary.config({
 
 
 const uploadOnCloudinary = async function(localFilePath){
-    console.log('this is working ')
  try {
     if(!localFilePath) return null;
 
@@ -28,7 +27,6 @@ const uploadOnCloudinary = async function(localFilePath){
     return response;
     
  } catch (error) {
-    console.log('error',error)
     await fs.unlink(localFilePath)
     return null;
 

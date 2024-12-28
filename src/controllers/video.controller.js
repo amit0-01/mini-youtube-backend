@@ -56,7 +56,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
     // const videos = await Video.aggregatePaginate(aggregate, options);
     const videos = await aggregate.exec(); 
-    // const videos = await Video.find(filter).sort(sort).exec();
 
     res.status(200).json({
         // success: true,
@@ -100,7 +99,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
     }
 
     let uploadVideo;
-    console.log('this is working')
     try {
         // Upload video to Cloudinary
         uploadVideo = await uploadOnCloudinary(videoFile.path);
