@@ -100,6 +100,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     }
 
     let uploadVideo;
+    console.log('this is working')
     try {
         // Upload video to Cloudinary
         uploadVideo = await uploadOnCloudinary(videoFile.path);
