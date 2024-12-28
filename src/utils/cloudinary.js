@@ -14,25 +14,29 @@ cloudinary.config({
 
 
 
-const uploadOnCloudinary = async function(localFilePath){
- try {
-    if(!localFilePath) return null;
+const uploadOnCloudinary = async function (localFilePath) {
+    try {
+        if (!localFilePath) throw new Error("No file path provided");
 
-    //upload file on cloudinary
-    const response = await cloudinary.uploader.upload(localFilePath,{
-        resource_type: "auto"
-    })
-    //fila has been uploaded succesfully
-    console.log("file is uploaded on cloudianry", response.url);
-    return response;
-    
- } catch (error) {
-    console.log('error',error)
-    await fs.unlink(localFilePath)
-    return null;
+        // Upload file to Cloudinary
+        const response = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "auto",
+        });
+        console.log("File uploaded to Cloudinary:", response.url);
+        return response;
+    } catch (error) {
+        console.error("Cloudinary Upload Error:", error);
+        if (localFilePath) {
+            try {
+                await fs.promises.unlink(localFilePath); // Use fs.promises for better error handling
+                console.log("Temporary file deleted:", localFilePath);
+            } catch (unlinkError) {
+                console.error("Failed to delete file:", unlinkError);
+            }
+        }
+        throw error; // Let the caller handle the error
+    }
+};
 
-    
- }
-}
 
 export {uploadOnCloudinary}
