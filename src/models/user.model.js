@@ -51,7 +51,7 @@ const userSchema = new Schema({
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
     try {
-        this.password = await bcrypt.hash(this.password, 10); // Corrected typo in 'this.password'
+        this.password = await bcrypt.hash(this.password, 10); 
         next();
     } catch (error) {
         return next(error); // Handle error
@@ -77,9 +77,9 @@ userSchema.methods.generateAccessToken = function() {
         username: this.username,
         fullname: this.fullname
       },
-      process.env.ACCESS_TOKEN_SECRET, // Ensure correct secret key is used
+      process.env.ACCESS_TOKEN_SECRET, 
       {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRY // Ensure correct expiry time is used
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY 
       }
     );
     // console.log("Refresh Token:", refreshToken); // Log the refresh token

@@ -4,6 +4,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
 import mongoose from 'mongoose'
 import fs from 'fs';
+import { uploadOnS3 } from "../utils/s3Upload.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
@@ -101,7 +102,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
     let uploadVideo;
     try {
         // Upload video to Cloudinary
-        uploadVideo = await uploadOnCloudinary(videoFile.path);
+        // uploadVideo = await uploadOnCloudinary(videoFile.path);
+        uploadVideo = await uploadOnS3(videoFile.path);
+
+        // Upload video to s3
     } catch (error) {
         console.log('error',error)
         return res.status(500).json({ success: false, message: 'Failed to upload video to Cloudinary', error });
@@ -111,7 +115,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if (thumbnailFile) {
         try {
             // Upload thumbnail to Cloudinary
-            uploadThumbnail = await uploadOnCloudinary(thumbnailFile.path);
+            // uploadThumbnail = await uploadOnCloudinary(thumbnailFile.path);
+            uploadThumbnail = await uploadOnS3(thumbnailFile.path);
+
+            // Upload thumbnail to s3
         } catch (error) {
             return res.status(500).json({ success: false, message: 'Failed to upload thumbnail to Cloudinary', error });
         }
