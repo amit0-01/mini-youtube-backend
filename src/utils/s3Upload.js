@@ -24,7 +24,7 @@ const uploadOnS3 = async (localFilePath) => {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: fileName,
       Body: fileContent,
-      ContentType: "video/mp4" // or dynamic
+      ContentType: "video/mp4"
     };
 
     const command = new PutObjectCommand(uploadParams);
