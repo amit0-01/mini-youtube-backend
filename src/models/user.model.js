@@ -82,7 +82,7 @@ userSchema.methods.generateAccessToken = function() {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY 
       }
     );
-    // console.log("Refresh Token:", refreshToken); // Log the refresh token
+    //  // Log the refresh token
 
     return refreshToken;
   }

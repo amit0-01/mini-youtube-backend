@@ -141,7 +141,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     fs.unlink(videoFile.path, (err)=>{
         if(err){
-            console.log('Error deleting video File', err);            
+                        
         }
     });
 

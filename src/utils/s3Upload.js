@@ -34,7 +34,7 @@ const uploadOnS3 = async (localFilePath) => {
 
     const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 
-    console.log("File uploaded to S3:", fileUrl);
+    
 
     return {
       url: fileUrl,

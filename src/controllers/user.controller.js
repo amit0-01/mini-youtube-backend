@@ -240,7 +240,7 @@ const updateUserAvatar = asyncHandler(async function(req,res){
 });
 
 const updateCoverImage = asyncHandler(async function(req,res){
-  console.log('req',req.file);
+  
   
   const coverImageLocalPath = req.file?.path
 
