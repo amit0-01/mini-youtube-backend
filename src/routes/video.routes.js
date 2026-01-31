@@ -6,7 +6,8 @@ import {
     publishAVideo,
     // togglePublishStatus,
     updateVideo,
-    getUsersVideos
+    getUsersVideos,
+    downloadVideo
 } from "../controllers/video.controller.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -46,6 +47,11 @@ router
 router
     .route("/users/:userId")
     .get(verifyJWT,getUsersVideos);
+
+
+router
+    .route("/download/:videoId")
+    .get(downloadVideo);
 
 
 

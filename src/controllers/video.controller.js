@@ -227,4 +227,27 @@ const getUsersVideos = asyncHandler(async (req, res) => {
     }
 });
 
-export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo, getUsersVideos };
+const downloadVideo = async (req, res) => {
+    try {
+      const { videoId } = req.params;
+  
+      const video = await Video.findById(videoId);
+      if (!video || !video.videoFile) {
+        return res.status(404).json({ message: "Video not found" });
+      }
+  
+      const downloadUrl = video.videoFile.replace(
+        "/upload/",
+        "/upload/fl_attachment/"
+      );
+      
+      return res.redirect(downloadUrl);
+  
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+  
+
+export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo, getUsersVideos,downloadVideo };
