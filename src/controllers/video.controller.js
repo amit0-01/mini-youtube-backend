@@ -7,7 +7,11 @@ import fs from 'fs';
 import { uploadOnS3 } from "../utils/s3Upload.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
+    const { page = 1, limit = 12, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
+
+    const pageNumber = parseInt(page);
+    const pageLimit = parseInt(limit);
+    const skip = (pageNumber - 1) * pageLimit;
 
     const filter = {};
     if (query) {
@@ -20,9 +24,13 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const sort = {};
     sort[sortBy] = sortType === 'desc' ? -1 : 1;
 
+    const totalVideos = await Video.countDocuments(filter);
+
     const aggregate = Video.aggregate([
         { $match: filter },
         { $sort: sort },
+        { $skip : skip},
+        { $limit : pageLimit},
         {
             $lookup: {
                 from: 'users',
@@ -59,14 +67,12 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const videos = await aggregate.exec(); 
 
     res.status(200).json({
-        // success: true,
-        // count: videos.docs.length,
-        // page: videos.page,
-        // totalPages: videos.totalPages,
-        // data: videos.docs,
         success: true,
+        currentPage: pageNumber,
+        totalPages: Math.ceil(totalVideos / pageLimit),
+        totalVideos,
         count: videos.length,
-        data: videos,
+        data: videos
     });
 });
 
