@@ -234,13 +234,17 @@ const getUsersVideos = asyncHandler(async (req, res) => {
 });
 
 const downloadVideo = async (req, res) => {
+    console.log('started ')
     try {
       const { videoId } = req.params;
   
       const video = await Video.findById(videoId);
       if (!video || !video.videoFile) {
         return res.status(404).json({ message: "Video not found" });
+        
       }
+
+      console.log('video', video);
   
       const downloadUrl = video.videoFile.replace(
         "/upload/",
