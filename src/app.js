@@ -27,6 +27,8 @@ import likeRouter from "./routes/like.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
 import viewRouter from "./routes/view.routes.js"
 import chatBotRoute from './routes/chatbot.route.js';
+import notificationRouter from "./routes/notification.routes.js";
+
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/tweets", tweetRouter)
@@ -37,6 +39,7 @@ app.use("/api/v1/likes", likeRouter)
 app.use("/api/v1/playlist", playlistRouter)
 app.use("/api/v1/view", viewRouter)
 app.use("/api/v1/chatBot", chatBotRoute);
+app.use("/api/v1/notifications", notificationRouter);
 
 export {app}
 
