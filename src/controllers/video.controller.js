@@ -5,6 +5,7 @@ import { User } from "../models/user.model.js";
 import mongoose from 'mongoose'
 import fs from 'fs';
 import { uploadOnS3 } from "../utils/s3Upload.js";
+import {generateTranscriptForVideo} from "../services/transcript.service.js"
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 12, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
@@ -107,11 +108,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     let uploadVideo;
     try {
-        // Upload video to Cloudinary
-        // uploadVideo = await uploadOnCloudinary(videoFile.path);
-        uploadVideo = await uploadOnS3(videoFile.path);
+        uploadVideo = await uploadOnCloudinary(videoFile.path);
 
-        // Upload video to s3
     } catch (error) {
         console.log('error',error)
         return res.status(500).json({ success: false, message: 'Failed to upload video to Cloudinary', error });
@@ -120,11 +118,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     let uploadThumbnail;
     if (thumbnailFile) {
         try {
-            // Upload thumbnail to Cloudinary
-            // uploadThumbnail = await uploadOnCloudinary(thumbnailFile.path);
-            uploadThumbnail = await uploadOnS3(thumbnailFile.path);
-
-            // Upload thumbnail to s3
+            uploadThumbnail = await uploadOnCloudinary(thumbnailFile.path);
         } catch (error) {
             return res.status(500).json({ success: false, message: 'Failed to upload thumbnail to Cloudinary', error });
         }
@@ -139,27 +133,34 @@ const publishAVideo = asyncHandler(async (req, res) => {
         owner
     });
 
-    try {
-        await video.save();
-    } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to save video in database', error });
-    }
-
-    fs.unlink(videoFile.path, (err)=>{
-        if(err){
-                        
+    generateTranscriptForVideo(video._id, videoFile.path)
+    .then(() => {
+      console.log("Transcript generated successfully");
+    })
+    .catch((error) => {
+      console.error("Transcript generation failed:", error.message);
+    })
+    .finally(() => {
+      fs.unlink(videoFile.path, (err) => {
+        if (err) {
+          console.error("Error deleting video file:", err);
         }
+      });
     });
 
-    if(thumbnailFile){
-        fs.unlink(thumbnailFile.path,(err)=>{
-            if(err){
-                console.error('Error deleting thumbnail file: ', err);
-            }
-        })
-    }
+  if (thumbnailFile) {
+    fs.unlink(thumbnailFile.path, (err) => {
+      if (err) {
+        console.error("Error deleting thumbnail file:", err);
+      }
+    });
+  }
 
-    res.status(201).json({ success: true, data: video });
+  return res.status(201).json({
+    success: true,
+    message: "Video uploaded successfully. Transcript is processing.",
+    data: video,
+  });
 });
 
 
@@ -258,6 +259,23 @@ const downloadVideo = async (req, res) => {
       return res.status(500).json({ message: "Internal server error" });
     }
   };
-  
 
-export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo, getUsersVideos,downloadVideo };
+const getVideoTranscript = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  const transcript = await Transcript.findOne({ video: videoId });
+
+  if (!transcript) {
+    return res.status(404).json({
+      success: false,
+      message: "Transcript not found",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: transcript,
+  });
+});
+
+export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo, getUsersVideos,downloadVideo, getVideoTranscript };

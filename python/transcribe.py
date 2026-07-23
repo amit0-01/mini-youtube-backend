@@ -3,28 +3,39 @@ import sys
 from faster_whisper import WhisperModel
 
 video_path = sys.argv[1]
+language = sys.argv[2] if len(sys.argv) > 2 else "en"
 
 model = WhisperModel(
     "base",
-    device = "cpu",
-    compute_type = "int8"
+    device="cpu",
+    compute_type="int8"
 )
 
-segments, info = model.transcribe(video_path)
+segments, info = model.transcribe(
+    video_path,
+    language=language,
+    task="transcribe",
+    beam_size=5,
+    vad_filter=True
+)
 
 result = {
-    "language" : info.language,
-    "text" : "",
-    "segments" : []
+    "language": language,
+    "text": "",
+    "segments": []
 }
 
-for segment in segments :
-    result["text"] += segment.text + " "
+for segment in segments:
+    clean_text = segment.text.strip()
+
+    result["text"] += clean_text + " "
 
     result["segments"].append({
-        "start" : segment.start,
-        "end" : segment.end,
-        "text" : segment.text
+        "start": segment.start,
+        "end": segment.end,
+        "text": clean_text
     })
 
-print(json.dumps(result))
+result["text"] = result["text"].strip()
+
+print(json.dumps(result, ensure_ascii=False))

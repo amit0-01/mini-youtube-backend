@@ -7,7 +7,8 @@ import {
     // togglePublishStatus,
     updateVideo,
     getUsersVideos,
-    downloadVideo
+    downloadVideo,
+    getVideoTranscript
 } from "../controllers/video.controller.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -53,7 +54,7 @@ router
     .route("/download/:videoId")
     .get(downloadVideo);
 
-
+router.get("/video/:videoId/transcript", getVideoTranscript);
 
 
 // router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
