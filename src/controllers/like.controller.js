@@ -37,25 +37,44 @@ const getLikedVideos = asyncHandler(async function(req, res) {
 
 const toogleCommentLike = asyncHandler(async function(req, res) {
     const { commentId } = req.params;
-    const userId = req.user ? req.user._id : null; // Assuming req.user contains the authenticated user's ID
+    const userId = req.user ? req.user._id : null; 
 
     try {
-        // Check if a like exists for the given comment by the current user
         const existingLike = await Like.findOne({ comment: commentId, likedBy: userId });
 
-        // If a like exists, remove it
         if (existingLike) {
-            await Like.deleteOne({ comment: commentId, likedBy: userId });
+             await Promise.all([
+            Like.deleteOne({ _id: existingLike._id }),
+
+            Notification.deleteOne({
+                recipient: comment.owner,
+                sender: userId,
+                type: "like",
+                comment: commentId,
+            }),
+            ]);
             return res.status(200).json({ success: true, message: "Comment like removed successfully" });
         } 
 
-        // If no like exists, add a new like
         const newLike = await Like.create({
             comment: commentId,
             likedBy: userId
         });
 
         await newLike.save();
+          if (comment.owner.toString() !== userId.toString()) {
+            try {
+            await Notification.create({
+                recipient: comment.owner,
+                sender: userId,
+                type: "like",
+                video: comment.video,
+                comment: comment._id,
+            });
+            } catch (error) {
+            console.error("Comment-like notification failed:", error);
+            }
+        }
 
         return res.status(200).json({ success: true, message: "Comment liked successfully", newLike });
 
@@ -111,45 +130,39 @@ const toogleTweetLike = asyncHandler(async function(req,res){
 
 const toogleVideoLike = asyncHandler(async function(req,res){
     const { videoId } = req.params;
-    const  userId  = req.user; // Assuming you have user authentication middleware that populates req.user with user details
+    const  userId  = req.user; 
     
 
     try {
-        // Validate videoId
         if (!mongoose.Types.ObjectId.isValid(videoId)) {
             return res.status(400).json({ success: false, message: "Invalid video ID" });
         }
 
-        // Validate userId
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ success: false, message: "Invalid user ID" });
         }
 
-        // Check if the video exists
         const video = await Video.findById(videoId);
         if (!video) {
             return res.status(404).json({ success: false, message: "Video not found" });
         }
 
-        // Check if a like exists for the given video by the current user
         const existingLike = await Like.findOne({ video: videoId, likedBy: userId });
 
-        if (existingLike) {
-            // Remove the existing like
+        if (existingLike) { 
             await Like.deleteOne({_id:existingLike._id});
             return res.status(200).json({ success: true, message: "Video unliked successfully" });
         } else {
-            // Add a new like
             const newLike = new Like({
                 video: videoId,
                 likedBy: userId
             });
             await newLike.save();
+
             return res.status(200).json({ success: true, message: "Video liked successfully", data: newLike });
         }
     } catch (error) {
         console.error("Error toggling video like:", error);
-        // Handle other errors
         return res.status(500).json({ success: false, message: "Server error" });
     }
 })
