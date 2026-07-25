@@ -1,5 +1,7 @@
 # Ignore .env file
 .env
+.env.*
+!.env.example
 node_modules/
 # public/
 

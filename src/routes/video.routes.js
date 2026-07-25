@@ -52,9 +52,9 @@ router
 
 router
     .route("/download/:videoId")
-    .get(downloadVideo);
+    .get(verifyJWT,downloadVideo);
 
-router.get("/video/:videoId/transcript", getVideoTranscript);
+router.route("/:videoId/transcript").get(verifyJWT,getVideoTranscript);
 
 
 // router.route("/toggle/publish/:videoId").patch(togglePublishStatus);

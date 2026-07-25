@@ -6,6 +6,7 @@ import mongoose from 'mongoose'
 import fs from 'fs';
 import { uploadOnS3 } from "../utils/s3Upload.js";
 import {generateTranscriptForVideo} from "../services/transcript.service.js"
+import Transcript from "../models/transcript.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 12, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
