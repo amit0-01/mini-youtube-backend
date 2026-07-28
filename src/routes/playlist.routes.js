@@ -12,7 +12,7 @@ import {verifyJWT} from "../middlewares/auth.middleware.js"
 
 const router = Router();
 
-router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
+router.use(verifyJWT);
 
 router.route("/create").post(createPlaylist)
 
@@ -20,7 +20,7 @@ router
     .route("/:playlistId")
     .get(getPlaylistById)
     .patch(updatePlaylist)
-    .delete(deletePlaylist);
+    .delete(deletePlaylist);    
 
 router.route("/add/:videoId/:playlistId").patch(addVideoToPlaylist);
 router.route("/remove/:videoId/:playlistId").patch(removeVideoFromPlaylist);

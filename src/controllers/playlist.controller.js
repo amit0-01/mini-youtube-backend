@@ -11,25 +11,20 @@ const createPlaylist = asyncHandler(async (req, res) => {
     const { name, description } = req.body;
 
     try {
-        // Create a new playlist instance
         const newPlaylist = await playlist.create({
             name,
             description,
-            owner: req.user._id // Assuming you have user authentication and req.user contains user details
+            owner: req.user._id 
         });
 
-        // Save the playlist to the database
         await newPlaylist.save();
 
-        // Return success response
         res.status(201).json({ success: true, data: newPlaylist });
     } catch (error) {
         console.error("Error creating playlist:", error);
-        // Handle specific error cases, e.g., validation errors
         if (error instanceof mongoose.Error.ValidationError) {
             return res.status(400).json({ success: false, message: error.message });
         }
-        // Handle other errors
         res.status(500).json({ success: false, message: "Server error" });
     }
 })
@@ -38,19 +33,15 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // Find all playlists by the user ID
         const playlists = await playlist.find({ owner: userId }).populate('videos owner');
 
-        // Check if the user has any playlists
-        // if (playlists.length === 0) {
-        //     return res.status(200).json({ success: true, message: "No playlists found for this user" });
-        // }
+        if (playlists.length === 0) {
+            return res.status(200).json({ success: true, message: "No playlists found for this user" });
+        }
 
-        // Return the user's playlists
         res.status(200).json({ success: true, data: playlists });
     } catch (error) {
         console.error("Error fetching user playlists:", error);
-        // Handle other errors
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
