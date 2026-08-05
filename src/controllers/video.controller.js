@@ -7,7 +7,8 @@ import fs from 'fs';
 import { uploadOnS3 } from "../utils/s3Upload.js";
 import {generateTranscriptForVideo} from "../services/transcript.service.js"
 import Transcript from "../models/transcript.model.js";
-
+import {askThisVideo} from '../services/video.service.js'
+import {ApiResponse} from '../utils/ApiResponse.js'
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 12, query = '', sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
 
@@ -279,4 +280,26 @@ const getVideoTranscript = asyncHandler(async (req, res) => {
   });
 });
 
-export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo, getUsersVideos,downloadVideo, getVideoTranscript };
+const askVideoQuestion = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const { question } = req.body;
+
+  if (!question?.trim()) {
+    throw new ApiError(400, "Question is required");
+  }
+
+  const result = await askThisVideo({
+    videoId,
+    question: question.trim(),
+  });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      result,
+      "Video question answered successfully"
+    )
+  );
+});
+
+export { getAllVideos, getVideoById,  publishAVideo, updateVideo, deleteVideo, getUsersVideos,downloadVideo, getVideoTranscript,askVideoQuestion };

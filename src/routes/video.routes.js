@@ -8,7 +8,8 @@ import {
     updateVideo,
     getUsersVideos,
     downloadVideo,
-    getVideoTranscript
+    getVideoTranscript,
+    askVideoQuestion
 } from "../controllers/video.controller.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -55,6 +56,8 @@ router
     .get(verifyJWT,downloadVideo);
 
 router.route("/:videoId/transcript").get(verifyJWT,getVideoTranscript);
+router.route("/:videoId/ask").post(verifyJWT,askVideoQuestion);
+
 
 
 // router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
