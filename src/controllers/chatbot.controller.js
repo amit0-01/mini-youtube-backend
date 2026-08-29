@@ -15,7 +15,6 @@ export const chatWithAI = async (req, res) => {
         model: "gemini-2.5-flash",
       });
   
-      // 🔥 Website-specific prompt
       const finalPrompt = `
         ${WEBSITE_CONTEXT}
         
